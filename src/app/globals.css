@@ -1,0 +1,181 @@
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  /* Warm Monochrome Base */
+  --canvas: #FAF9F5;
+  --surface: #FFFFFF;
+  --surface-subtle: #F4F3EE;
+  --surface-hover: #EFEFE9;
+
+  /* Typographic Contrast */
+  --text-primary: #1E2022;
+  --text-secondary: #63666A;
+  --text-muted: #8A8D91;
+  --text-on-dark: #FAF9F5;
+
+  /* Structural Hairlines */
+  --border-subtle: #E8E7E1;
+  --border-strong: #D5D3CB;
+  --border-focus: #1E2022;
+
+  /* Muted Clinical Accent (Used sparingly) */
+  --accent-sage: #EBF3EF;
+  --accent-sage-text: #1E5646;
+  --accent-sage-border: #C8DCD3;
+
+  /* Subtle Alert Tint (Emergency notice) */
+  --alert-tint: #FDF4E9;
+  --alert-tint-text: #8A4B08;
+  --alert-tint-border: #F3DECA;
+
+  /* Typography Stacks */
+  --font-serif: 'Newsreader', Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Radius Discipline (Structured, never generic pill shapes everywhere) */
+  --radius-sm: 3px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+
+  /* Flat / Ultra-diffuse Elevation */
+  --shadow-flat: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-floating: 0 8px 30px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+
+  /* Layout */
+  --max-width: 1140px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  background-color: var(--canvas);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  background-color: var(--canvas);
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+/* Typography Directives */
+h1, h2, h3, .serif-heading {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+p {
+  color: var(--text-secondary);
+}
+
+.mono-meta {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  letter-spacing: -0.01em;
+  color: var(--text-muted);
+}
+
+/* Layout Utilities */
+.site-container {
+  max-width: var(--max-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+/* Minimalist Button Primitives */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: var(--text-primary);
+  color: var(--surface);
+  padding: 0.625rem 1.25rem;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  border: 1px solid var(--text-primary);
+  cursor: pointer;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.btn-primary:hover {
+  background-color: #2F3438;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: var(--surface);
+  color: var(--text-primary);
+  padding: 0.625rem 1.25rem;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  border: 1px solid var(--border-strong);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-secondary:hover {
+  background-color: var(--surface-hover);
+  border-color: var(--text-primary);
+}
+
+/* Micro badges */
+.badge-sage {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  background-color: var(--accent-sage);
+  color: var(--accent-sage-text);
+  border: 1px solid var(--accent-sage-border);
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.badge-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  background-color: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-strong);
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+}
+
+/* Structural Divider */
+.hairline-divider {
+  width: 100%;
+  height: 1px;
+  background-color: var(--border-subtle);
+  border: none;
+}
