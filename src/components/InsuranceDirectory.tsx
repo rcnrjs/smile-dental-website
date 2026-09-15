@@ -32,7 +32,7 @@ export default function InsuranceDirectory({ onVerifyInsurance }: InsuranceDirec
             In-network with major dental plans.
           </h2>
           <p style={{ fontSize: "1rem", color: "var(--text-secondary)", lineHeight: 1.6 }}>
-            Insurance clarity matters. We are in-network with premier carriers so your preventive visits carry zero or minimal out-of-pocket expenses. Search your carrier below or verify with Ava.
+            Insurance clarity matters. We are in-network with premier carriers so your preventive visits carry zero or minimal out-of-pocket expenses. Search your carrier below or verify with Ian.
           </p>
         </div>
 
@@ -130,7 +130,7 @@ export default function InsuranceDirectory({ onVerifyInsurance }: InsuranceDirec
                 className="btn-secondary"
                 style={{ marginTop: "1.25rem", width: "100%", fontSize: "0.8125rem" }}
               >
-                Verify {item.name} with Ava
+                Verify {item.name} with Ian
               </button>
             </div>
           ))}

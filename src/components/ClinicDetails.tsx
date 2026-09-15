@@ -99,7 +99,7 @@ export default function ClinicDetails({ onOpenChat }: ClinicDetailsProps) {
                 className="btn-primary"
                 style={{ width: "100%", fontSize: "0.8125rem" }}
               >
-                Schedule with Ava (AI Receptionist)
+                Schedule with Ian (AI Receptionist)
               </button>
             </div>
           </div>

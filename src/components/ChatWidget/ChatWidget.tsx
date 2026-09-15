@@ -14,7 +14,7 @@ export default function ChatWidget({ isOpen, onClose, initialPrompt }: ChatWidge
     {
       id: "welcome",
       sender: "assistant",
-      text: "Hello, welcome to Smile Dental! I am Ava, your friendly virtual receptionist. How can I assist you today?",
+      text: "Hello, welcome to Smile Dental! I am Ian, your friendly virtual receptionist. How can I assist you today?",
       timestamp: "Just now",
       quickReplies: ["Book Free Consultation", "Check Insurance", "Same-Day Emergency", "View Services"],
     },
@@ -164,7 +164,7 @@ export default function ChatWidget({ isOpen, onClose, initialPrompt }: ChatWidge
 
           <div>
             <div style={{ fontSize: "0.9375rem", fontWeight: 600, color: "var(--text-primary)" }}>
-              Ava
+              Ian
             </div>
             <div className="mono-meta" style={{ fontSize: "0.6875rem", marginTop: "-2px" }}>
               Virtual Receptionist • Active 24/7
@@ -273,7 +273,7 @@ export default function ChatWidget({ isOpen, onClose, initialPrompt }: ChatWidge
         {isLoading && (
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.5rem 0" }}>
             <span className="mono-meta" style={{ fontStyle: "italic" }}>
-              Ava is writing...
+              Ian is writing...
             </span>
           </div>
         )}

@@ -46,18 +46,18 @@ export async function POST(req: NextRequest) {
         }
         console.warn("n8n webhook did not return standard text payload, falling back to local engine.");
       } catch (n8nErr) {
-        console.warn("Failed to reach self-hosted n8n webhook, utilizing built-in Ava engine:", n8nErr);
+        console.warn("Failed to reach self-hosted n8n webhook, utilizing built-in Ian engine:", n8nErr);
       }
     }
 
-    // 2. Built-in Ava Engine (Zero external dependencies, always operational)
+    // 2. Built-in Ian Engine (Zero external dependencies, always operational)
     const result = processFallbackMessage(message, history || []);
 
     return NextResponse.json({
       response: result.response,
       quickReplies: result.quickReplies || [],
       extractedLead: result.extractedLead || null,
-      source: "ava-builtin-engine",
+      source: "ian-builtin-engine",
     });
   } catch (error) {
     console.error("API /api/chat error:", error);

@@ -1,8 +1,9 @@
 import { CLINIC_INFO, INSURANCE_ROSTER } from "./clinicData";
 import { ChatMessage, LeadRecord } from "./types";
 
-export const AVA_SYSTEM_PROMPT = `
-You are Ava, the friendly virtual assistant for Smile Dental Family Dentistry — a dental clinic in Orlando, FL serving families since 2018.
+export const IAN_SYSTEM_PROMPT = `
+You are Ian, the friendly virtual assistant for Smile Dental Family Dentistry — a dental clinic in Orlando, FL serving families since 2018.
+export const AVA_SYSTEM_PROMPT = IAN_SYSTEM_PROMPT;
 Your job is to help website visitors learn about Smile Dental's services, answer common dental questions, and guide them toward booking an appointment or claiming their free consultation.
 
 You must sound warm, calm, professional, and concise.
@@ -35,8 +36,19 @@ MAIN GOALS:
 3. Answer questions about services, insurance, location, and appointments.
 4. Guide new patients toward the free consultation.
 
+MANDATORY BOOKING INTAKE (Ask ONE question at a time):
+When a visitor is booking an appointment or claiming a free consultation, you MUST sequentially collect ALL of the following details before finalizing:
+1. Preferred Day & Time (ensure it falls within office hours)
+2. Full Name
+3. Phone Number (best number to reach them)
+4. Email Address (required to send the booking confirmation and digital intake forms)
+
+CRITICAL RULE:
+* NEVER conclude with "You are all set" until you have asked for and received their EMAIL ADDRESS.
+* If you have their name and phone number, your next question MUST be: "What is the best email address to send your appointment confirmation to?"
+
 GUARDRAILS:
-1. Never claim to be human or a licensed dentist. If asked, state you are Ava, Smile Dental's virtual assistant.
+1. Never claim to be human or a licensed dentist. If asked, state you are Ian, Smile Dental's virtual assistant.
 2. Never diagnose dental symptoms or prescribe medications. Suggest they come in for an evaluation.
 3. Never quote exact binding prices in chat. Explain that fees depend on exam findings, and invite them to the free consultation.
 4. For urgent emergency symptoms (severe facial swelling, uncontrolled bleeding, broken jaw), emphasize calling ${CLINIC_INFO.contact.phone} immediately or visiting an emergency room.
@@ -73,7 +85,7 @@ export function processFallbackMessage(
   if (text.includes("are you human") || text.includes("are you a person") || text.includes("are you real") || text.includes("are you ai")) {
     return {
       response:
-        "I am Ava, the virtual assistant for Smile Dental. I am here 24/7 to help you book appointments, check your insurance, and answer questions about our practice. How can I help you today?",
+        "I am Ian, the virtual assistant for Smile Dental. I am here 24/7 to help you book appointments, check your insurance, and answer questions about our practice. How can I help you today?",
       quickReplies: ["Book Free Consultation", "Check Insurance", "View Services"],
     };
   }
@@ -112,7 +124,44 @@ export function processFallbackMessage(
     };
   }
 
-  // 6. Services Inquiries
+  // 6. Direct Service Booking Actions (Break loops when user selects action buttons)
+  if (text.includes("book whitening") || text.includes("brightening session")) {
+    return {
+      response:
+        "I'd be delighted to help you book your professional teeth whitening session! To get started, may I have your first and last name?",
+    };
+  }
+
+  if (text.includes("sensitivity") || text.includes("sensitive")) {
+    return {
+      response:
+        "Our in-office whitening procedure uses protective barrier gel and desensitizing agents to keep sensitivity minimal during and after your visit. Would you like to go ahead and book your whitening session?",
+      quickReplies: ["Book Whitening Session", "Other Services", "Check Insurance"],
+    };
+  }
+
+  if (text === "routine checkup" || text.includes("routine checkup")) {
+    return {
+      response:
+        "Wonderful! Routine preventive exams and cleanings keep your smile healthy. May I have your first and last name to schedule your visit?",
+    };
+  }
+
+  if (text === "tooth discomfort" || text.includes("discomfort")) {
+    return {
+      response:
+        "I'm sorry to hear you are experiencing discomfort. Our clinical team will take gentle care of you. May I have your first and last name so we can arrange an exam?",
+    };
+  }
+
+  if (text === "cosmetic consultation" || text.includes("cosmetic")) {
+    return {
+      response:
+        "We would love to discuss cosmetic enhancement options with you! May I have your first and last name to reserve your consultation with our doctor?",
+    };
+  }
+
+  // 7. General Services Inquiries
   if (text.includes("service") || text.includes("offer") || text.includes("what do you do") || text.includes("cleaning") || text.includes("whitening") || text.includes("implant")) {
     if (text.includes("whitening")) {
       return {
@@ -135,7 +184,7 @@ export function processFallbackMessage(
     };
   }
 
-  // 7. Free Consultation / New Patient Qualification Flow
+  // 8. Free Consultation / New Patient Qualification Flow
   if (text.includes("free consultation") || text.includes("consultation") || text.includes("new patient") || text.includes("appointment") || text.includes("book")) {
     return {
       response:
@@ -144,40 +193,147 @@ export function processFallbackMessage(
     };
   }
 
-  // 8. Lead Extraction & Sequential Collection Flow
-  // Check for email
-  const emailMatch = userText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
-  // Check for phone
-  const phoneMatch = userText.match(/(?:\+?1[-. ]?)?\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})/);
-  
-  if (emailMatch || phoneMatch) {
-    const lead: Partial<LeadRecord> = {
-      email: emailMatch ? emailMatch[0] : "",
-      phone: phoneMatch ? phoneMatch[0] : "",
-      source: "Smile Dental Chat",
-      status: "New Lead",
-      dateCaptured: new Date().toLocaleString("en-US", { timeZone: "America/New_York" }),
-    };
+  // 9. Multi-Turn History Awareness (Track what has already been collected)
+  let knownName = "";
+  let knownPhone = "";
+  let knownEmail = "";
 
+  for (const m of history) {
+    const t = m.text || "";
+    // If assistant greeted with name
+    const greetingMatch = t.match(/Nice to meet you, ([A-Za-z]+)!/i);
+    if (greetingMatch && !knownName) {
+      knownName = greetingMatch[1];
+    }
+    if (m.sender === "user") {
+      const email = t.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+      if (email && !knownEmail) knownEmail = email[0].toLowerCase();
+      
+      const phoneMatch = t.match(/(?:\+?\d{1,4}[-.\s]?)?(?:\(?\d{2,4}\)?[-.\s]?)?\d{3,4}[-.\s]?\d{3,5}/);
+      if (phoneMatch) {
+        const digits = phoneMatch[0].replace(/\D/g, "");
+        if (digits.length >= 10 && digits.length <= 15 && !knownPhone) {
+          knownPhone = phoneMatch[0].trim();
+        }
+      }
+    }
+  }
+
+  // 10. Sequential Collection Flow
+  // Check for email in current message
+  const currentEmail = userText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+  // Check for phone in current message
+  const currentPhoneCandidates = userText.match(/(?:\+?\d{1,4}[-.\s]?)?(?:\(?\d{2,4}\)?[-.\s]?)?\d{3,4}[-.\s]?\d{3,5}/g);
+  let currentPhone = "";
+  if (currentPhoneCandidates) {
+    for (const cand of currentPhoneCandidates) {
+      const digits = cand.replace(/\D/g, "");
+      if (digits.length >= 10 && digits.length <= 15) {
+        currentPhone = cand.trim();
+        break;
+      }
+    }
+  }
+
+  // If user just provided an EMAIL
+  if (currentEmail) {
     return {
       response:
-        "Thank you! I have saved your contact details. What is your full name so our patient coordinator can address your reservation correctly?",
-      extractedLead: lead,
-      quickReplies: ["Confirm with name", "Call me instead"],
+        "Got it, thank you! What day of the week or time works best for your visit?",
+      extractedLead: {
+        email: currentEmail[0].toLowerCase(),
+        phone: knownPhone || "",
+        firstName: knownName || "",
+      },
     };
   }
 
-  // Check if user answered with a name (e.g. "Jasmine Reyes" or "My name is Jasmine")
-  if (text.startsWith("my name is ") || text.split(" ").length === 2 && !text.includes("how") && !text.includes("what")) {
-    const cleanName = userText.replace(/^my name is\s+/i, "").trim();
-    const [firstName, ...rest] = cleanName.split(" ");
-    const lastName = rest.join(" ");
-
+  // If user just provided a PHONE
+  if (currentPhone) {
+    if (knownName) {
+      return {
+        response:
+          `Thank you, ${knownName}! What is the best email address to send your confirmation to?`,
+        extractedLead: {
+          phone: currentPhone,
+          firstName: knownName,
+        },
+      };
+    }
     return {
-      response: `Nice to meet you, ${firstName}! To finalize your free consultation slot, what is the best phone number or email address to confirm your time?`,
+      response:
+        "Thank you! What is your full name so our coordinator can address your reservation correctly?",
+      extractedLead: {
+        phone: currentPhone,
+      },
+    };
+  }
+
+  // If user provided DATE / TIME preference
+  if (text.includes("am") || text.includes("pm") || text.includes("monday") || text.includes("tuesday") || text.includes("wednesday") || text.includes("thursday") || text.includes("friday") || text.includes("september") || text.includes("october") || text.includes("morning") || text.includes("afternoon")) {
+    return {
+      response:
+        "That works wonderfully! Is there a specific dental concern you'd like our team to focus on during your visit?",
+      quickReplies: ["Routine Checkup", "Teeth Whitening", "Tooth Discomfort", "Cosmetic Consultation"],
+    };
+  }
+
+  // If user provided a DENTAL CONCERN or answered the concern question
+  if (text.includes("crack") || text.includes("pain") || text.includes("clean") || text.includes("checkup") || text.includes("whitening") || text.includes("cavity") || text.includes("bleeding") || text.includes("discomfort") || text.includes("teeth")) {
+    return {
+      response:
+        `Thank you${knownName ? `, ${knownName}` : ""}! Our clinical team will prepare for your visit. Is there anything else I can help you with today?`,
+      quickReplies: ["No, I'm good", "Check Insurance", "Clinic Location"],
+    };
+  }
+
+  // If user says "no" or "good" or closes
+  if (text === "no" || text.includes("no,") || text.includes("i'm good") || text.includes("im good") || text.includes("all set") || text.includes("that's all")) {
+    return {
+      response:
+        "You're all set! We look forward to seeing you at Smile Dental. Have a wonderful rest of your day!",
+    };
+  }
+
+  // Check if user answered with a NAME (ignore common button phrases like "Confirm with name", "Call me instead", etc.)
+  const isIgnoredPhrase = /^(confirm|confirm with name|call me|call me instead|book|check|free|consultation|emergency|services|yes|no|good|okay|ok)$/i.test(userText.trim());
+  const introMatch = !isIgnoredPhrase ? userText.match(/(?:my name is|name is)\s+([A-Za-z\s.'-]+?)(?=(?:\s+and|\s+my|\s+phone|\s+email|[.,\n]|$))/i) : null;
+
+  function splitFullName(fullName: string) {
+    const words = fullName.trim().split(/\s+/);
+    if (words.length === 1) return { firstName: words[0], lastName: "" };
+    if (words.length === 2) return { firstName: words[0], lastName: words[1] };
+    const surnamePrefixes = /^(de|del|dela|da|van|von|san|st\.?|dos|das)$/i;
+    if (words.length >= 3 && surnamePrefixes.test(words[words.length - 2])) {
+      return {
+        firstName: words.slice(0, words.length - 2).join(" "),
+        lastName: words.slice(words.length - 2).join(" "),
+      };
+    }
+    return {
+      firstName: words.slice(0, words.length - 1).join(" "),
+      lastName: words[words.length - 1],
+    };
+  }
+
+  const isDentalTerm = /(aligner|teeth|whitening|implant|checkup|cleaning|crown|veneer|cosmetic|emergency|consultation|routine|exam|appointment|service|dentist|dentistry|filling|bridge|braces|invisalign|root canal|extraction)/i.test(userText);
+
+  if (introMatch && introMatch[1] && !isDentalTerm) {
+    const { firstName, lastName } = splitFullName(introMatch[1]);
+    return {
+      response: `Nice to meet you, ${firstName}! What is the best phone number to reach you at?`,
       extractedLead: {
         firstName,
-        lastName: lastName || "",
+        lastName,
+      },
+    };
+  } else if (!isIgnoredPhrase && !isDentalTerm && /^[A-Za-z\s.'-]+$/.test(userText.trim()) && userText.trim().split(/\s+/).length >= 2 && userText.trim().split(/\s+/).length <= 4 && !text.includes("how") && !text.includes("what") && !text.includes("book")) {
+    const { firstName, lastName } = splitFullName(userText);
+    return {
+      response: `Nice to meet you, ${firstName}! What is the best phone number to reach you at?`,
+      extractedLead: {
+        firstName,
+        lastName,
       },
     };
   }
@@ -195,7 +351,7 @@ export function processFallbackMessage(
   if (text.includes("hi") || text.includes("hello") || text.includes("hey") || text === "") {
     return {
       response:
-        "Hello, welcome to Smile Dental! I am Ava, your virtual receptionist. How can I assist you today?",
+        "Hello, welcome to Smile Dental! I am Ian, your virtual receptionist. How can I assist you today?",
       quickReplies: ["Book Free Consultation", "Do you accept my insurance?", "Same-day Emergency", "View Services"],
     };
   }

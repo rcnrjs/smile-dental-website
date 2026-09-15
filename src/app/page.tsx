@@ -114,7 +114,7 @@ export default function Home() {
 
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", textAlign: "left" }}>
             <span style={{ fontSize: "0.875rem", fontWeight: 600, lineHeight: 1.2 }}>
-              Ask Ava
+              Ask Ian
             </span>
             <span className="mono-meta" style={{ fontSize: "0.6875rem", color: "#B8BABF" }}>
               24/7 Virtual Receptionist
